@@ -1,4 +1,4 @@
-package com.flab.inqueue.common.domain
+package com.flab.inqueue.domain
 
 import jakarta.persistence.*
 import org.springframework.data.annotation.CreatedDate

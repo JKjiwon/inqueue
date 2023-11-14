@@ -1,6 +1,6 @@
 package com.flab.inqueue.domain.member.entity
 
-import com.flab.inqueue.common.domain.BaseEntity
+import com.flab.inqueue.domain.BaseEntity
 import com.flab.inqueue.security.common.Role
 import jakarta.persistence.*
 

@@ -3,7 +3,7 @@ package com.flab.inqueue.support
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.flab.inqueue.domain.queue.entity.Job
-import com.flab.inqueue.infra.property.RedisProperty
+import com.flab.inqueue.config.redis.RedisProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean

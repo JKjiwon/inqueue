@@ -1,4 +1,4 @@
-package com.flab.inqueue.infra.property
+package com.flab.inqueue.config.redis
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 

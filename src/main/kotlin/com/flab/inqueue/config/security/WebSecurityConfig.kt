@@ -1,5 +1,7 @@
-package com.flab.inqueue.security
+package com.flab.inqueue.config.security
 
+import com.flab.inqueue.security.CustomAccessDenierHandler
+import com.flab.inqueue.security.CustomAuthenticationEntryPoint
 import com.flab.inqueue.security.hmacsinature.HmacAuthenticationProvider
 import com.flab.inqueue.security.hmacsinature.HmacSignatureAuthenticationFilter
 import com.flab.inqueue.security.jwt.JwtAuthenticationFilter

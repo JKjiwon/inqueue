@@ -1,6 +1,5 @@
-package com.flab.inqueue.infra.config
+package com.flab.inqueue.config.redis
 
-import com.flab.inqueue.infra.property.RedisProperty
 import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
 import org.springframework.context.annotation.Configuration
