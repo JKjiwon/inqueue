@@ -3,7 +3,6 @@ package com.flab.inqueue.domain.member.entity
 import com.flab.inqueue.common.domain.BaseEntity
 import com.flab.inqueue.security.common.Role
 import jakarta.persistence.*
-import java.time.LocalDateTime
 
 @Entity(name = "MEMBER")
 class Member(
@@ -19,5 +18,4 @@ class Member(
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     val roles: List<Role> = listOf(Role.USER),
-    val createdDateTime: LocalDateTime = LocalDateTime.now()
 ) : BaseEntity()
