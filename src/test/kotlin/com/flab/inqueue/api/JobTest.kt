@@ -2,7 +2,6 @@ package com.flab.inqueue.api
 
 import com.flab.inqueue.AcceptanceTest
 import com.flab.inqueue.REST_DOCS_DOCUMENT_IDENTIFIER
-import com.flab.inqueue.domain.event.dto.EventInformation
 import com.flab.inqueue.domain.event.entity.Event
 import com.flab.inqueue.domain.event.repository.EventRepository
 import com.flab.inqueue.domain.member.entity.Member
@@ -75,15 +74,6 @@ class JobTest : AcceptanceTest() {
             LocalDateTime.now().plusDays(10),
             1L,
             10L,
-            EventInformation(
-                "testEvent",
-                LocalDateTime.now(),
-                LocalDateTime.now().plusDays(10),
-                "test description",
-                "test place",
-                100L,
-                "TEST CONCERT"
-            ),
             "https://test"
         ).toEntity(UUID.randomUUID().toString(), member)
 

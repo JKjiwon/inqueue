@@ -8,6 +8,5 @@ data class EventRetrieveResponse(
     val waitQueueEndTime: LocalDateTime? = null,
     val jobQueueSize: Long? = null,
     val jobQueueLimitTime: Long? = null,
-    val eventInformation: EventInformation? = null,
     val redirectUrl: String? = null,
 )

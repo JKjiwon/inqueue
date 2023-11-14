@@ -71,7 +71,6 @@ class EventService(
             waitQueueEndTime = event.period.endDateTime,
             jobQueueSize = event.jobQueueSize,
             jobQueueLimitTime = event.jobQueueLimitTime,
-            eventInformation = event.eventInfo,
             redirectUrl = event.redirectUrl
         )
     }

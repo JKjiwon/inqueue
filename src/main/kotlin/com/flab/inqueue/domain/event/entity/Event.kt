@@ -1,7 +1,6 @@
 package com.flab.inqueue.domain.event.entity
 
 import com.flab.inqueue.common.domain.BaseEntity
-import com.flab.inqueue.domain.event.dto.EventInformation
 import com.flab.inqueue.domain.member.entity.Member
 import jakarta.persistence.*
 import java.time.LocalDateTime
@@ -16,7 +15,6 @@ class Event(
     @Embedded var period: WaitQueuePeriod,
     @Column(nullable = false) var jobQueueSize: Long,
     @Column(nullable = false) var jobQueueLimitTime: Long,
-    @Embedded var eventInfo: EventInformation? = null,
     var redirectUrl: String?,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
@@ -31,7 +29,6 @@ class Event(
         this.period = event.period
         this.jobQueueSize = event.jobQueueSize
         this.jobQueueLimitTime = event.jobQueueLimitTime
-        this.eventInfo = event.eventInfo
         this.redirectUrl = event.redirectUrl
         this.modifiedDateTime = LocalDateTime.now()
     }

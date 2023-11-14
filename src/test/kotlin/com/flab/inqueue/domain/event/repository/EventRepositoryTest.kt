@@ -1,6 +1,5 @@
 package com.flab.inqueue.domain.event.repository
 
-import com.flab.inqueue.domain.event.dto.EventInformation
 import com.flab.inqueue.domain.event.entity.Event
 import com.flab.inqueue.domain.member.entity.Member
 import com.flab.inqueue.domain.member.entity.MemberKey
@@ -74,19 +73,10 @@ class EventRepositoryTest(
     fun update() {
         //given
         val findEvent = eventRepository.findByEventId(testEventId1)!!
-        val testEventInfo = EventInformation(
-            "test",
-            LocalDateTime.now().minusDays(2),
-            LocalDateTime.now(),
-            "test description",
-            "test place",
-            10L,
-            "TEST-CONCERT"
-        )
         val testRedirectUrl = "http://testUrl"
         val updateEventRequest = createEventRequest(
             LocalDateTime.now().minusDays(2), LocalDateTime.now().plusDays(2),
-            500, 12334, testEventInfo, testRedirectUrl
+            500, 12334,testRedirectUrl
         )
         findEvent.update(updateEventRequest.toEntity(findEvent.eventId, testMember))
         // when
@@ -94,7 +84,6 @@ class EventRepositoryTest(
         // then
         assertThat(modifiedEvent).isNotNull
         assertThat(modifiedEvent.eventId).isEqualTo(findEvent.eventId)
-        assertThat(modifiedEvent.eventInfo).isEqualTo(testEventInfo)
         assertThat(modifiedEvent.redirectUrl).isEqualTo(testRedirectUrl)
     }
 
