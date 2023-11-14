@@ -33,7 +33,7 @@ class EventService(
     }
 
     @Transactional
-    fun save(clientId: String, request: EventRequest): EventResponse {
+    fun create(clientId: String, request: EventRequest): EventResponse {
         val member = memberRepository.findByKeyClientId(clientId)
             ?: throw MemberNotFoundException("회원을 찾을 수 업습니다.")
         val eventId = UUID.randomUUID().toString()
