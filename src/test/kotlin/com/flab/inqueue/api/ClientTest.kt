@@ -2,7 +2,6 @@ package com.flab.inqueue.api
 
 import com.flab.inqueue.AcceptanceTest
 import com.flab.inqueue.REST_DOCS_DOCUMENT_IDENTIFIER
-import com.flab.inqueue.domain.event.dto.EventInformation
 import com.flab.inqueue.domain.member.dto.MemberSignUpRequest
 import com.flab.inqueue.domain.member.entity.Member
 import com.flab.inqueue.domain.member.entity.MemberKey
@@ -93,15 +92,6 @@ class ClientTest : AcceptanceTest() {
             LocalDateTime.now().plusDays(10),
             1L,
             10L,
-            EventInformation(
-                "testEvent",
-                LocalDateTime.now(),
-                LocalDateTime.now().plusDays(10),
-                "test description",
-                "test place",
-                100L,
-                "TEST CONCERT"
-            ),
             "https://test"
         )
 
@@ -149,12 +139,6 @@ object CreateEventDocument {
     private fun requestFieldsSnippet(): Snippet {
         return requestFields(
             fieldWithPath("eventId").type(JsonFieldType.STRING).description("이벤트 식별자").optional(),
-            fieldWithPath("eventInformation.name").type(JsonFieldType.STRING).description("이름").optional(),
-            fieldWithPath("eventInformation.description").type(JsonFieldType.STRING).description("설명").optional(),
-            fieldWithPath("eventInformation.place").type(JsonFieldType.STRING).description("장소").optional(),
-            fieldWithPath("eventInformation.startTime").type(JsonFieldType.ARRAY).description("행사 시작 시간").optional(),
-            fieldWithPath("eventInformation.endTime").type(JsonFieldType.ARRAY).description("행사 마침 시간").optional(),
-            fieldWithPath("eventInformation.personnel").type(JsonFieldType.NUMBER).description("인원").optional(),
             fieldWithPath("waitQueueStartTime").type(JsonFieldType.ARRAY).description("대기 큐 시작 시간"),
             fieldWithPath("waitQueueEndTime").type(JsonFieldType.ARRAY).description("대기 큐 마침 시간"),
             fieldWithPath("eventInformation.type").type(JsonFieldType.STRING).description("행사 종류").optional(),

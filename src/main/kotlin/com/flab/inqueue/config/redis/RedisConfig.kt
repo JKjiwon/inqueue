@@ -1,9 +1,8 @@
-package com.flab.inqueue.infra.config
+package com.flab.inqueue.config.redis
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.flab.inqueue.domain.queue.entity.Job
-import com.flab.inqueue.infra.property.RedisProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.RedisConnectionFactory

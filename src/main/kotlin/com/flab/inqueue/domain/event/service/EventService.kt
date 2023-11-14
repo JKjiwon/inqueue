@@ -33,7 +33,7 @@ class EventService(
     }
 
     @Transactional
-    fun save(clientId: String, request: EventRequest): EventResponse {
+    fun create(clientId: String, request: EventRequest): EventResponse {
         val member = memberRepository.findByKeyClientId(clientId)
             ?: throw MemberNotFoundException("회원을 찾을 수 업습니다.")
         val eventId = UUID.randomUUID().toString()
@@ -43,7 +43,7 @@ class EventService(
 
     @Transactional
     fun update(clientId: String, eventId: String, request: EventRequest) {
-        var foundEvent = findEvent(eventId)
+        val foundEvent = findEvent(eventId)
         if (!foundEvent.isAccessible(clientId)) {
             throw EventAccessException("해당 이벤트에 접근할 수 없습니다.")
         }
@@ -52,11 +52,11 @@ class EventService(
 
     @Transactional
     fun delete(clientId: String, eventId: String) {
-        var foundEvent = findEvent(eventId)
+        val foundEvent = findEvent(eventId)
         if (!foundEvent.isAccessible(clientId)) {
             throw EventAccessException("해당 이벤트에 접근할 수 없습니다.")
         }
-        eventRepository.deleteById(foundEvent.id)
+        eventRepository.deleteById(foundEvent.id!!)
     }
 
     private fun findEvent(eventId: String): Event {
@@ -71,7 +71,6 @@ class EventService(
             waitQueueEndTime = event.period.endDateTime,
             jobQueueSize = event.jobQueueSize,
             jobQueueLimitTime = event.jobQueueLimitTime,
-            eventInformation = event.eventInfo,
             redirectUrl = event.redirectUrl
         )
     }

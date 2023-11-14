@@ -71,8 +71,8 @@ class EventServiceTest {
     }
 
     @Test
-    @DisplayName("이벤트 저장 성공")
-    fun succeedToSave() {
+    @DisplayName("이벤트 생성 성공")
+    fun succeedToCreate() {
         //given
         val eventRequest = createEventRequest()
         val eventId = UUID.randomUUID().toString()
@@ -80,7 +80,7 @@ class EventServiceTest {
         every { eventRepository.save(event) } returns event
 
         //when
-        val eventResponse = eventService.save(member.key.clientId, eventRequest)
+        val eventResponse = eventService.create(member.key.clientId, eventRequest)
 
         //then
         assertAll(

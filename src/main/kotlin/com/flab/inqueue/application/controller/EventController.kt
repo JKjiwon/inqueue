@@ -19,7 +19,7 @@ class EventController(
         @RequestBody @Valid eventRequest: EventRequest,
         @AuthenticationPrincipal principal: CommonPrincipal,
     ): EventResponse {
-        return eventService.save(principal.clientId, eventRequest)
+        return eventService.create(principal.clientId, eventRequest)
     }
 
     @GetMapping("/{eventId}")
