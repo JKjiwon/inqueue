@@ -85,7 +85,7 @@ class JobService(
         return jobRedisRepository.size(JobStatus.ENTER.makeRedisKey(event.eventId))
     }
 
-    fun getWaitQueueSize(event: Event) :Long {
+    fun getWaitQueueSize(event: Event): Long {
         return waitQueueService.size(JobStatus.WAIT.makeRedisKey(event.eventId))
     }
 

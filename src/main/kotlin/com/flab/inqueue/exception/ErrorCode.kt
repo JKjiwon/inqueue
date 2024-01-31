@@ -3,9 +3,9 @@ package com.flab.inqueue.exception
 import org.springframework.http.HttpStatus
 
 enum class ErrorCode(
-        val httpStatus: HttpStatus,
-        val code: Int,
-        val message: String
+    val httpStatus: HttpStatus,
+    val code: Int,
+    val message: String
 ) {
     OK(HttpStatus.OK, 200, "OK"),
     BAD_REQUEST(HttpStatus.BAD_REQUEST, 400, "Bad Request"),

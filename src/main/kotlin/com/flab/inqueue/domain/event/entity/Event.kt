@@ -26,7 +26,7 @@ class Event(
         this.redirectUrl = event.redirectUrl
     }
 
-    fun isAccessible(clientId : String) :Boolean {
+    fun isAccessible(clientId: String): Boolean {
         return this.member.key.clientId == clientId
     }
 }

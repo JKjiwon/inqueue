@@ -9,7 +9,7 @@ import redis.embedded.RedisServer
 @Profile("dev")
 @Configuration
 class DevEmbeddedRedisConfig(
-        redisProperty: RedisProperty
+    redisProperty: RedisProperty
 ) {
     lateinit var redisServer: RedisServer
 
