@@ -8,7 +8,7 @@ import redis.embedded.RedisServer
 
 @Profile("dev")
 @Configuration
-class DevEmbeddedRedisConfig (
+class DevEmbeddedRedisConfig(
     redisProperty: RedisProperty
 ) {
     private val redisServer: RedisServer

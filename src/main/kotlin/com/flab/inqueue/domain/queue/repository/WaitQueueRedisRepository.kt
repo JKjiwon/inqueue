@@ -54,7 +54,7 @@ class WaitQueueRedisRepository(
     }
 
     fun updateUserTtl(job: Job) {
-        userRedisTemplate.opsForValue().set(job.redisValue,job.redisValue, job.queueLimitTime, TimeUnit.SECONDS)
+        userRedisTemplate.opsForValue().set(job.redisValue, job.redisValue, job.queueLimitTime, TimeUnit.SECONDS)
     }
 
     fun popMin(key: String, size: Long): MutableSet<ZSetOperations.TypedTuple<Job>> {
