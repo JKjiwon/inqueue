@@ -57,9 +57,10 @@ dependencies {
     testImplementation("org.springframework.restdocs:spring-restdocs-restassured")
 
     /* testcontainers */
-    testImplementation("org.testcontainers:testcontainers:1.17.2")
-    testImplementation("org.testcontainers:junit-jupiter:1.17.2")
-    testImplementation("org.testcontainers:mysql:1.17.2")
+    implementation(platform("org.testcontainers:testcontainers-bom:1.19.4"))
+    testImplementation ("org.testcontainers:junit-jupiter:1.19.4")
+    testImplementation("org.testcontainers:mysql")
+
 }
 tasks.withType<KotlinCompile> {
     kotlinOptions {
