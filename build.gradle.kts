@@ -44,9 +44,7 @@ dependencies {
     runtimeOnly ("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    implementation("it.ozimov:embedded-redis:0.7.3"){
-        this.exclude("org.slf4j", "slf4j-simple")
-    }
+    implementation("com.github.codemonstur:embedded-redis:1.2.0")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 

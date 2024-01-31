@@ -1,7 +1,6 @@
 package com.flab.inqueue.security
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.flab.inqueue.application.common.ErrorResponse
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.MediaType
@@ -26,11 +25,12 @@ class CustomAuthenticationEntryPoint(
         response.status = HttpServletResponse.SC_UNAUTHORIZED
         response.contentType = MediaType.APPLICATION_JSON_VALUE
 
-        val jsonResponse = ErrorResponse(
-            error = DEFAULT_UNAUTHORIZED_ERROR_MESSAGE,
-            status = HttpServletResponse.SC_UNAUTHORIZED,
-            path = request.requestURI
+
+        val jsonResponse = com.flab.inqueue.exception.ErrorResponse(
+                code = HttpServletResponse.SC_UNAUTHORIZED,
+                message = DEFAULT_UNAUTHORIZED_ERROR_MESSAGE,
         )
+
         response.writer.write(objectMapper.writeValueAsString(jsonResponse))
     }
 }

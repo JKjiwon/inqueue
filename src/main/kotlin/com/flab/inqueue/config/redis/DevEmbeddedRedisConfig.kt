@@ -8,10 +8,10 @@ import redis.embedded.RedisServer
 
 @Profile("dev")
 @Configuration
-class DevEmbeddedRedisConfig (
-    redisProperty: RedisProperty
+class DevEmbeddedRedisConfig(
+        redisProperty: RedisProperty
 ) {
-    private val redisServer: RedisServer
+    lateinit var redisServer: RedisServer
 
     init {
         redisServer = RedisServer(redisProperty.port)
