@@ -1,14 +1,14 @@
 package com.flab.inqueue.domain.queue.service
 
 import com.flab.inqueue.domain.event.entity.Event
-import com.flab.inqueue.domain.event.exception.EventAccessException
 import com.flab.inqueue.domain.event.repository.EventRepository
 import com.flab.inqueue.domain.queue.dto.JobResponse
 import com.flab.inqueue.domain.queue.dto.JobVerificationResponse
 import com.flab.inqueue.domain.queue.entity.Job
 import com.flab.inqueue.domain.queue.entity.JobStatus
-import com.flab.inqueue.domain.queue.exception.JobNotFoundException
 import com.flab.inqueue.domain.queue.repository.JobRedisRepository
+import com.flab.inqueue.exception.ApplicationException
+import com.flab.inqueue.exception.ErrorCode
 import org.springframework.stereotype.Service
 
 @Service
@@ -60,7 +60,7 @@ class JobService(
     fun verify(eventId: String, clientId: String, userId: String): JobVerificationResponse {
         val event = findEvent(eventId)
         if (!event.isAccessible(clientId)) {
-            throw EventAccessException("해당 이벤트에 접근할 수 없습니다.")
+            throw ApplicationException.of(ErrorCode.EVENT_NOT_ACCESSED)
         }
 
         val job = Job(eventId, userId, JobStatus.ENTER)
@@ -71,12 +71,12 @@ class JobService(
     fun close(eventId: String, clientId: String, userId: String) {
         val event = findEvent(eventId)
         if (!event.isAccessible(clientId)) {
-            throw EventAccessException("해당 이벤트에 접근할 수 없습니다.")
+            throw ApplicationException.of(ErrorCode.EVENT_NOT_ACCESSED)
         }
 
         val job = Job(eventId, userId, JobStatus.ENTER)
         if (!jobRedisRepository.isMember(job)) {
-            throw JobNotFoundException("Job[eventId=${eventId}, userId=${userId}]이 작업열에 존재하지 않습니다.")
+            throw ApplicationException.of(ErrorCode.JOB_NOT_FOUND_IN_JOB_QUEUE)
         }
         jobRedisRepository.remove(job)
     }
@@ -90,7 +90,7 @@ class JobService(
     }
 
     private fun findEvent(eventId: String): Event {
-        return eventRepository.findByEventId(eventId) ?: throw NoSuchElementException("행사를 찾을 수 없습니다. $eventId")
+        return eventRepository.findByEventId(eventId) ?: throw ApplicationException.of(ErrorCode.EVENT_NOT_FOUND)
     }
 
     private fun isEnterJob(event: Event): Boolean {

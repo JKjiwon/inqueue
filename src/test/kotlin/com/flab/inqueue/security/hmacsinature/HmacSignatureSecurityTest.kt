@@ -106,10 +106,8 @@ class HmacSignatureSecurityTest : AcceptanceTest() {
         then().log().all()
             .statusCode(HttpStatus.UNAUTHORIZED.value())
             .assertThat()
-            .body("error", Matchers.equalTo("Unauthorized"))
-            .body("timestamp", Matchers.notNullValue())
-            .body("status", Matchers.notNullValue())
-            .body("path", Matchers.notNullValue())
+            .body("message", Matchers.equalTo("Unauthorized"))
+            .body("code",Matchers.equalTo(401))
     }
 
     @Test
@@ -131,10 +129,8 @@ class HmacSignatureSecurityTest : AcceptanceTest() {
         then().log().all()
             .statusCode(HttpStatus.UNAUTHORIZED.value())
             .assertThat()
-            .body("error", Matchers.equalTo("Unauthorized"))
-            .body("timestamp", Matchers.notNullValue())
-            .body("status", Matchers.notNullValue())
-            .body("path", Matchers.notNullValue())
+            .body("message", Matchers.equalTo("Unauthorized"))
+            .body("code",Matchers.equalTo(401))
     }
 
     @Test
@@ -147,10 +143,8 @@ class HmacSignatureSecurityTest : AcceptanceTest() {
         then().log().all()
             .statusCode(HttpStatus.UNAUTHORIZED.value())
             .assertThat()
-            .body("error", Matchers.equalTo("Unauthorized"))
-            .body("timestamp", Matchers.notNullValue())
-            .body("status", Matchers.notNullValue())
-            .body("path", Matchers.notNullValue())
+            .body("message", Matchers.equalTo("Unauthorized"))
+            .body("code",Matchers.equalTo(401))
     }
 
     @Test
@@ -192,9 +186,7 @@ class HmacSignatureSecurityTest : AcceptanceTest() {
         then().log().all()
             .statusCode(HttpStatus.FORBIDDEN.value())
             .assertThat()
-            .body("error", Matchers.equalTo("Forbidden"))
-            .body("timestamp", Matchers.notNullValue())
-            .body("status", Matchers.notNullValue())
-            .body("path", Matchers.notNullValue())
+            .body("message", Matchers.equalTo("Forbidden"))
+            .body("code",Matchers.equalTo(403))
     }
 }

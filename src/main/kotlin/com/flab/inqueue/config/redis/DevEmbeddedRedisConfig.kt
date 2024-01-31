@@ -11,7 +11,7 @@ import redis.embedded.RedisServer
 class DevEmbeddedRedisConfig(
     redisProperty: RedisProperty
 ) {
-    private val redisServer: RedisServer
+    lateinit var redisServer: RedisServer
 
     init {
         redisServer = RedisServer(redisProperty.port)
