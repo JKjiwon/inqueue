@@ -3,6 +3,7 @@ package com.flab.inqueue.application.controller
 import com.flab.inqueue.domain.member.dto.MemberSignUpRequest
 import com.flab.inqueue.domain.member.dto.MemberSignUpResponse
 import com.flab.inqueue.domain.member.service.MemberService
+import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -15,7 +16,7 @@ class MemberController(
 ) {
 
     @PostMapping
-    fun signUp(@RequestBody request: MemberSignUpRequest): MemberSignUpResponse {
+    fun signUp(@RequestBody @Valid request: MemberSignUpRequest): MemberSignUpResponse {
         return memberService.signUp(request)
     }
 }

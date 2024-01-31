@@ -20,7 +20,7 @@ class MemberService(
     fun signUp(request: MemberSignUpRequest): MemberSignUpResponse {
         val memberKey = memberKeyGenerator.generate()
         val encryptedMemberKey = memberKey.encrypt(encryptionUtil)
-        val member = Member(request.name, request.phone, encryptedMemberKey)
+        val member = Member(request.name!!, request.phone, encryptedMemberKey)
         memberRepository.save(member)
         return MemberSignUpResponse(member.name, memberKey)
     }
