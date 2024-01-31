@@ -4,11 +4,10 @@ import com.flab.inqueue.domain.event.dto.EventRequest
 import com.flab.inqueue.domain.event.dto.EventResponse
 import com.flab.inqueue.domain.event.dto.EventRetrieveResponse
 import com.flab.inqueue.domain.event.entity.Event
-import com.flab.inqueue.domain.event.exception.EventAccessException
-import com.flab.inqueue.domain.event.exception.EventNotFoundException
 import com.flab.inqueue.domain.event.repository.EventRepository
-import com.flab.inqueue.domain.member.exception.MemberNotFoundException
 import com.flab.inqueue.domain.member.repository.MemberRepository
+import com.flab.inqueue.exception.ApplicationException
+import com.flab.inqueue.exception.ErrorCode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -22,7 +21,7 @@ class EventService(
     fun retrieve(clientId: String, eventId: String): EventRetrieveResponse {
         val foundEvent = findEvent(eventId)
         if (!foundEvent.isAccessible(clientId)) {
-            throw EventAccessException("해당 이벤트에 접근할 수 없습니다.")
+            throw ApplicationException.of(ErrorCode.EVENT_NOT_ACCESSED)
         }
 
         return toEventRetrieveResponse(foundEvent)
@@ -35,7 +34,7 @@ class EventService(
     @Transactional
     fun create(clientId: String, request: EventRequest): EventResponse {
         val member = memberRepository.findByKeyClientId(clientId)
-            ?: throw MemberNotFoundException("회원을 찾을 수 업습니다.")
+            ?: throw ApplicationException.of(ErrorCode.MEMBER_NOT_FOUND)
         val eventId = UUID.randomUUID().toString()
         val savedEvent = eventRepository.save(request.toEntity(eventId, member))
         return EventResponse(savedEvent.eventId)
@@ -45,7 +44,7 @@ class EventService(
     fun update(clientId: String, eventId: String, request: EventRequest) {
         val foundEvent = findEvent(eventId)
         if (!foundEvent.isAccessible(clientId)) {
-            throw EventAccessException("해당 이벤트에 접근할 수 없습니다.")
+            throw ApplicationException.of(ErrorCode.EVENT_NOT_ACCESSED)
         }
         foundEvent.update(request.toEntity(eventId, foundEvent.member))
     }
@@ -54,14 +53,14 @@ class EventService(
     fun delete(clientId: String, eventId: String) {
         val foundEvent = findEvent(eventId)
         if (!foundEvent.isAccessible(clientId)) {
-            throw EventAccessException("해당 이벤트에 접근할 수 없습니다.")
+            throw ApplicationException.of(ErrorCode.EVENT_NOT_ACCESSED)
         }
         eventRepository.deleteById(foundEvent.id!!)
     }
 
     private fun findEvent(eventId: String): Event {
         return eventRepository.findByEventId(eventId)
-            ?: throw EventNotFoundException("행사를 찾을 수 없습니다.")
+            ?: throw ApplicationException.of(ErrorCode.EVENT_NOT_FOUND)
     }
 
     private fun toEventRetrieveResponse(event: Event): EventRetrieveResponse {

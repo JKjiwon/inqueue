@@ -1,20 +1,19 @@
 package com.flab.inqueue.domain.queue.service
 
 import com.flab.inqueue.domain.event.entity.Event
-import com.flab.inqueue.domain.event.exception.EventAccessException
 import com.flab.inqueue.domain.event.repository.EventRepository
 import com.flab.inqueue.domain.member.entity.Member
 import com.flab.inqueue.domain.member.entity.MemberKey
 import com.flab.inqueue.domain.queue.entity.Job
 import com.flab.inqueue.domain.queue.entity.JobStatus
 import com.flab.inqueue.domain.queue.repository.JobRedisRepository
+import com.flab.inqueue.exception.ApplicationException
 import com.flab.inqueue.fixture.createEventRequest
 import com.flab.inqueue.support.UnitTest
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
-
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -107,10 +106,10 @@ class JobServiceTest {
 
         // then
         val waitJob = Job(
-            eventId = eventId,
-            userId = userId,
-            jobQueueSize = event.jobQueueSize,
-            queueLimitTime = event.jobQueueLimitTime
+                eventId = eventId,
+                userId = userId,
+                jobQueueSize = event.jobQueueSize,
+                queueLimitTime = event.jobQueueLimitTime
         )
         verify { waitQueueService.retrieve(waitJob) }
     }
@@ -134,7 +133,8 @@ class JobServiceTest {
     fun fail_to_verify_job_queue() {
         // when & then
         val anotherClientId = "otherClientId"
-        assertThrows<EventAccessException> {  jobService.verify(eventId, anotherClientId, userId) }
+        val exception = assertThrows<ApplicationException> { jobService.verify(eventId, anotherClientId, userId) }
+        assertThat(exception.message).isEqualTo("Event is not accessed")
     }
 
     @Test
@@ -156,6 +156,7 @@ class JobServiceTest {
     fun fail_to_close_job_queue() {
         // when & then
         val anotherClientId = "otherClientId"
-        assertThrows<EventAccessException> {  jobService.close(eventId, anotherClientId, userId) }
+        val exception = assertThrows<ApplicationException> { jobService.close(eventId, anotherClientId, userId) }
+        assertThat(exception.message).isEqualTo("Event is not accessed")
     }
 }

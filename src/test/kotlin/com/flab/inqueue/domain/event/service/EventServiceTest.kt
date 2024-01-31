@@ -1,16 +1,16 @@
 package com.flab.inqueue.domain.event.service
 
-import com.flab.inqueue.domain.event.exception.EventNotFoundException
 import com.flab.inqueue.domain.event.repository.EventRepository
 import com.flab.inqueue.domain.member.entity.Member
 import com.flab.inqueue.domain.member.entity.MemberKey
 import com.flab.inqueue.domain.member.repository.MemberRepository
+import com.flab.inqueue.exception.ApplicationException
 import com.flab.inqueue.fixture.createEventRequest
 import com.flab.inqueue.support.UnitTest
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
-import org.assertj.core.api.Assertions.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 import java.util.*
 
@@ -67,7 +67,8 @@ class EventServiceTest {
         every { eventRepository.findByEventId(eventId) } returns null
 
         //when & then
-        assertThrows<EventNotFoundException> { eventService.retrieve(clientId, eventId) }
+        val exception = assertThrows<ApplicationException> { eventService.retrieve(clientId, eventId) }
+        assertThat(exception.message).isEqualTo("Event is not found")
     }
 
     @Test

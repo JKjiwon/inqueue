@@ -44,9 +44,7 @@ dependencies {
     runtimeOnly ("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    implementation("it.ozimov:embedded-redis:0.7.3"){
-        this.exclude("org.slf4j", "slf4j-simple")
-    }
+    implementation("com.github.codemonstur:embedded-redis:1.2.0")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
@@ -59,9 +57,10 @@ dependencies {
     testImplementation("org.springframework.restdocs:spring-restdocs-restassured")
 
     /* testcontainers */
-    testImplementation("org.testcontainers:testcontainers:1.17.2")
-    testImplementation("org.testcontainers:junit-jupiter:1.17.2")
-    testImplementation("org.testcontainers:mysql:1.17.2")
+    implementation(platform("org.testcontainers:testcontainers-bom:1.19.4"))
+    testImplementation ("org.testcontainers:junit-jupiter:1.19.4")
+    testImplementation("org.testcontainers:mysql")
+
 }
 tasks.withType<KotlinCompile> {
     kotlinOptions {
