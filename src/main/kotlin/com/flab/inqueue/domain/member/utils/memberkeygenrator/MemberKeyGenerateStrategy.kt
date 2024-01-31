@@ -4,6 +4,6 @@ import com.flab.inqueue.domain.member.entity.MemberKey
 
 interface MemberKeyGenerateStrategy {
 
-    fun generate() : MemberKey
+    fun generate(): MemberKey
 
 }
