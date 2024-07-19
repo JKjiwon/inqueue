@@ -2,7 +2,7 @@ package com.flab.inqueue.domain.queue.redis
 
 import com.flab.inqueue.TestContainer
 import com.flab.inqueue.domain.queue.entity.Job
-import com.flab.inqueue.support.RedisConfigTest
+import com.flab.inqueue.support.RedisTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
@@ -15,8 +15,7 @@ import org.springframework.data.redis.core.RedisTemplate
 import java.util.*
 
 
-@DataRedisTest
-@Import(RedisConfigTest::class)
+@RedisTest
 class JobRedisTemplateTest @Autowired constructor(
     private val jobRedisTemplate: RedisTemplate<String, Job>,
 ) : TestContainer() {

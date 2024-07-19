@@ -3,7 +3,7 @@ package com.flab.inqueue.domain.queue.repository
 import com.flab.inqueue.TestContainer
 import com.flab.inqueue.domain.queue.entity.Job
 import com.flab.inqueue.domain.queue.entity.JobStatus
-import com.flab.inqueue.support.RedisConfigTest
+import com.flab.inqueue.support.RedisTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,10 +14,8 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.test.context.ActiveProfiles
 import java.util.*
 
+@RedisTest
 @ComponentScan(basePackages = ["com.flab.inqueue.domain.queue.repository"])
-@Import(RedisConfigTest::class)
-@ActiveProfiles("test")
-@DataRedisTest
 class JobRedisRepositoryTest : TestContainer() {
 
     @Autowired
