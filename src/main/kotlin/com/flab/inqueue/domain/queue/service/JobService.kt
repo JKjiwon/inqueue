@@ -19,7 +19,7 @@ class JobService(
     private val eventRepository: EventRepository,
     private val waitQueueService: WaitQueueService,
 ) {
-    fun enter(eventId: String, userId: String): JobResponse {
+    fun enqueue(eventId: String, userId: String): JobResponse {
         val event = findEvent(eventId)
 
         if (canEnterJob(event)) {
@@ -37,13 +37,13 @@ class JobService(
         return waitQueueService.register(waitJob)
     }
 
-    fun enterAll(event: Event, size: Long) {
+    fun enqueue(event: Event, size: Long) {
         val waitJobs: List<Job> = waitQueueService.findJobsBy(event.eventId, size)
         val enterJobs = waitJobs.map { it.enter() }
         jobRedisRepository.saveAll(enterJobs)
     }
 
-    fun enterAll(events: List<Event>) {
+    fun enqueue(events: List<Event>) {
         val jobTargetEventIds = waitQueueService.getWaitQueueSizes(events.map { it.eventId })
             .filter { it.size != 0L }
             .map { it.eventId }.toList()
@@ -51,8 +51,9 @@ class JobService(
         val jobQueueSizesMap = getJobQueueSizes(jobTargetEventIds)
             .associate { event -> event.eventId to event.size }
 
+        val queueReadyEvents = events.filter { jobQueueSizesMap.containsKey(it.eventId) }
         val queueInfos: MutableList<QueueInfo> = mutableListOf()
-        for (event in events) {
+        for (event in queueReadyEvents) {
             val availableJobQueueSize = event.jobQueueSize - jobQueueSizesMap[event.eventId]!!
             if (availableJobQueueSize > 0) {
                 queueInfos.add(QueueInfo(event.eventId, availableJobQueueSize))

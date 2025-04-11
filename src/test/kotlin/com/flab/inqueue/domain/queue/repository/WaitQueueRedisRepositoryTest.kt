@@ -80,6 +80,63 @@ class WaitQueueRedisRepositoryTest : TestContainer() {
             )
     }
 
+    @DisplayName("큐의 사이즈가 0인 경우 <eventId, 0>의 형태로 반환한다.")
+    @Test
+    fun sizesWithOneEmptyQueue() {
+        // given
+        val eventId1 = UUID.randomUUID().toString()
+
+        // when
+        val sizes = waitQueueRedisRepository.sizes(
+            listOf(
+                eventId1
+            )
+        )
+        // then
+        assertThat(sizes).hasSize(1)
+            .extracting("eventId", "size")
+            .containsExactly(
+                tuple(eventId1, 0L)
+            )
+    }
+
+    @DisplayName("큐들 중 하나의 사이즈가 0인 경우 사이즈가 0인 큐는 <eventId, 0>의 형태로 반환한다.")
+    @Test
+    fun sizesWithEmptyQueueIncluded() {
+        // given
+        val eventId1 = UUID.randomUUID().toString()
+        val eventId1QueueSize = 10L
+        (0 until eventId1QueueSize).forEach { i ->
+            waitQueueRedisRepository.save(Job(eventId1, "user$i"))
+        }
+
+        val eventId2 = UUID.randomUUID().toString()
+
+        val eventId3 = UUID.randomUUID().toString()
+        val eventId3QueueSize = 30L
+        (0 until eventId3QueueSize).forEach { i ->
+            waitQueueRedisRepository.save(Job(eventId3, "user$i"))
+        }
+
+        // when
+        val sizes = waitQueueRedisRepository.sizes(
+            listOf(
+                eventId1,
+                eventId2,
+                eventId3
+            )
+        )
+
+        // then
+        assertThat(sizes).hasSize(3)
+            .extracting("eventId", "size")
+            .containsExactly(
+                tuple(eventId1, eventId1QueueSize),
+                tuple(eventId2, 0L),
+                tuple(eventId3, eventId3QueueSize),
+            )
+    }
+
     @DisplayName("SortedSet의 상위 n개의 Job을 조회한다.")
     @Test
     fun popMin() {

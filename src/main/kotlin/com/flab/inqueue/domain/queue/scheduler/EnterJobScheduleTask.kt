@@ -23,11 +23,11 @@ class EnterJobScheduleTask(
             return
         }
 
-        jobService.enterAll(event, availableJobQueueSize)
+        jobService.enqueue(event, availableJobQueueSize)
     }
 
     @Async("threadPoolTaskExecutor")
     fun enterJobs(events: List<Event>) {
-        jobService.enterAll(events)
+        jobService.enqueue(events)
     }
 }
