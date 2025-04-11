@@ -1,6 +1,8 @@
 package com.flab.inqueue.domain.queue.repository
 
+import com.flab.inqueue.domain.queue.dto.QueueSize
 import com.flab.inqueue.domain.queue.entity.Job
+import com.flab.inqueue.domain.queue.entity.JobStatus
 import com.flab.inqueue.domain.queue.exception.RedisDataAccessException
 import org.springframework.data.redis.connection.RedisStringCommands
 import org.springframework.data.redis.connection.StringRedisConnection
@@ -17,12 +19,12 @@ class JobRedisRepository(
     private val userRedisTemplate: RedisTemplate<String, String>,
 ) {
 
-    fun register(job: Job) {
+    fun save(job: Job) {
         jobRedisTemplate.opsForSet().add(job.redisKey, job)
         userRedisTemplate.opsForValue().set(job.redisValue, job.redisValue, job.queueLimitTime, TimeUnit.SECONDS)
     }
 
-    fun registerAll(jobs: List<Job>) {
+    fun saveAll(jobs: List<Job>) {
         val jobKeySerializer = jobRedisTemplate.keySerializer as StringRedisSerializer
         val jobValueSerializer = jobRedisTemplate.valueSerializer as Jackson2JsonRedisSerializer
         jobRedisTemplate.executePipelined { connection ->
@@ -54,12 +56,26 @@ class JobRedisRepository(
             ?: throw RedisDataAccessException("데이터에 접근 할 수 없습니다.")
     }
 
-    fun size(key: String): Long {
-        return jobRedisTemplate.opsForSet().size(key) ?: throw RedisDataAccessException("데이터에 접근 할 수 없습니다.")
-    }
-
     fun isMember(job: Job): Boolean {
         val hasUser = userRedisTemplate.opsForValue().get(job.redisValue)
         return hasUser != null
+    }
+
+    fun size(eventId: String): Long {
+        val redisKey = JobStatus.ENTER.makeRedisKey(eventId)
+        return jobRedisTemplate.opsForSet().size(redisKey) ?: throw RedisDataAccessException("데이터에 접근 할 수 없습니다.")
+    }
+
+    fun sizes(eventIds: List<String>): List<QueueSize> {
+        val redisKeys = eventIds.map { JobStatus.ENTER.makeRedisKey(it) }
+        val sizes = jobRedisTemplate.executePipelined { connection ->
+            redisKeys.forEach { redisKey ->
+                connection.setCommands().sCard(redisKey.toByteArray())
+            }
+            null
+        }
+
+        return eventIds.zip(sizes.map { it as Long })
+            .map { (key, size) -> QueueSize(key, size) }
     }
 }

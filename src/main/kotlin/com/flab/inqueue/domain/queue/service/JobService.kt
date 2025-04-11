@@ -4,6 +4,8 @@ import com.flab.inqueue.domain.event.entity.Event
 import com.flab.inqueue.domain.event.repository.EventRepository
 import com.flab.inqueue.domain.queue.dto.JobResponse
 import com.flab.inqueue.domain.queue.dto.JobVerificationResponse
+import com.flab.inqueue.domain.queue.dto.QueueInfo
+import com.flab.inqueue.domain.queue.dto.QueueSize
 import com.flab.inqueue.domain.queue.entity.Job
 import com.flab.inqueue.domain.queue.entity.JobStatus
 import com.flab.inqueue.domain.queue.repository.JobRedisRepository
@@ -22,7 +24,7 @@ class JobService(
 
         if (isEnterJob(event)) {
             val job = Job(eventId, userId, JobStatus.ENTER, event.jobQueueLimitTime)
-            jobRedisRepository.register(job)
+            jobRedisRepository.save(job)
             return JobResponse(job.status)
         }
 
@@ -36,9 +38,30 @@ class JobService(
     }
 
     fun enterAll(event: Event, size: Long) {
-        val waitJobs: List<Job> = waitQueueService.getJobsBySize(event.eventId, size)
-        val enterJobs = waitJobs.map { it.enter(event.jobQueueLimitTime) }
-        jobRedisRepository.registerAll(enterJobs)
+        val waitJobs: List<Job> = waitQueueService.findJobsBy(event.eventId, size)
+        val enterJobs = waitJobs.map { it.enter() }
+        jobRedisRepository.saveAll(enterJobs)
+    }
+
+    fun enterAll(events: List<Event>) {
+        val jobTargetEventIds = waitQueueService.getWaitQueueSizes(events.map { it.eventId })
+            .filter { it.size != 0L }
+            .map { it.eventId }.toList()
+
+        val jobQueueSizesMap = getJobQueueSizes(jobTargetEventIds)
+            .associate { event -> event.eventId to event.size }
+
+        val queueInfos: MutableList<QueueInfo> = mutableListOf()
+        for (event in events) {
+            val availableJobQueueSize = event.jobQueueSize - jobQueueSizesMap[event.eventId]!!
+            if (availableJobQueueSize > 0) {
+                queueInfos.add(QueueInfo(event.eventId, availableJobQueueSize))
+            }
+        }
+
+        val waitJobs = waitQueueService.findJobsBy(queueInfos)
+        val enterJobs = waitJobs.map { it.enter() }
+        jobRedisRepository.saveAll(enterJobs)
     }
 
     fun retrieve(eventId: String, userId: String): JobResponse {
@@ -56,6 +79,7 @@ class JobService(
         )
         return waitQueueService.retrieve(waitJob)
     }
+
 
     fun verify(eventId: String, clientId: String, userId: String): JobVerificationResponse {
         val event = findEvent(eventId)
@@ -98,5 +122,9 @@ class JobService(
         val jobQueueSize = getJobQueueSize(event)
 
         return waitQueueSize == 0L && jobQueueSize < event.jobQueueSize
+    }
+
+    private fun getJobQueueSizes(eventIds: List<String>): List<QueueSize> {
+        return jobRedisRepository.sizes(eventIds)
     }
 }

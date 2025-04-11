@@ -55,7 +55,7 @@ class JobServiceTest {
 
         // then
         val enterJob = Job(eventId, userId, JobStatus.ENTER, event.jobQueueLimitTime)
-        verify { jobRedisRepository.register(enterJob) }
+        verify { jobRedisRepository.save(enterJob) }
 
         val waitJob = Job(eventId, userId, JobStatus.WAIT, event.jobQueueLimitTime, event.jobQueueSize)
         verify(exactly = 0) { waitQueueService.register(waitJob) }
@@ -78,7 +78,7 @@ class JobServiceTest {
         verify { waitQueueService.register(waitJob) }
 
         val enterJob = Job(eventId, userId, JobStatus.ENTER, event.jobQueueLimitTime)
-        verify(exactly = 0) { jobRedisRepository.register(enterJob) }
+        verify(exactly = 0) { jobRedisRepository.save(enterJob) }
     }
 
     @Test

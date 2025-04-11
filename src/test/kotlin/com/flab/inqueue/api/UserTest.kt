@@ -111,10 +111,9 @@ class UserTest : AcceptanceTest() {
     @Test
     @DisplayName("사용자 작업열 진입불가 및 사용자 대기열 진입")
     fun enterWaitQueue() {
-
         val userId = UUID.randomUUID().toString()
         val job = Job(event.eventId, userId, JobStatus.ENTER, queueLimitTime = event.jobQueueLimitTime, jobQueueSize = event.jobQueueSize)
-        jobRedisRepository.register(job)
+        jobRedisRepository.save(job)
 
         val accessToken = jwtUtils.create(event.eventId, UUID.randomUUID().toString()).accessToken
 
@@ -138,7 +137,6 @@ class UserTest : AcceptanceTest() {
     @Test
     @DisplayName("사용자 작업열 진입")
     fun enterJobQueue() {
-
         val accessToken = jwtUtils.create(event.eventId, UUID.randomUUID().toString()).accessToken
 
         val response = givenWithDocument.log().all()
@@ -168,7 +166,7 @@ class UserTest : AcceptanceTest() {
         repeat(2){
             userId = UUID.randomUUID().toString()
             val job = Job(event.eventId, userId, queueLimitTime = event.jobQueueLimitTime, jobQueueSize = event.jobQueueSize)
-            waitQueueRedisRepository.register(job)
+            waitQueueRedisRepository.save(job)
         }
 
         val accessToken = jwtUtils.create(event.eventId,userId ).accessToken

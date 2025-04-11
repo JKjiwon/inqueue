@@ -1,19 +1,20 @@
 package com.flab.inqueue.domain.queue.service
 
 import com.flab.inqueue.domain.queue.dto.JobResponse
+import com.flab.inqueue.domain.queue.dto.QueueInfo
+import com.flab.inqueue.domain.queue.dto.QueueSize
 import com.flab.inqueue.domain.queue.dto.WaitQueueInfo
 import com.flab.inqueue.domain.queue.entity.Job
 import com.flab.inqueue.domain.queue.entity.JobStatus
 import com.flab.inqueue.domain.queue.repository.WaitQueueRedisRepository
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class WaitQueueService(
     private val waitQueueRedisRepository: WaitQueueRedisRepository,
 ) {
     fun register(job: Job): JobResponse {
-        val rank = waitQueueRedisRepository.register(job) + 1
+        val rank = waitQueueRedisRepository.save(job) + 1
         return JobResponse(JobStatus.WAIT, WaitQueueInfo(rank * job.waitTimePerOneJob, rank.toInt()))
     }
 
@@ -35,12 +36,19 @@ class WaitQueueService(
         return waitQueueRedisRepository.size(key)
     }
 
-    @Transactional
     fun remove(job: Job) {
         waitQueueRedisRepository.remove(job)
     }
 
-    fun getJobsBySize(eventId: String, size: Long): List<Job> {
-        return waitQueueRedisRepository.popMin(JobStatus.WAIT.makeRedisKey(eventId), size).map { it.value!! }
+    fun findJobsBy(eventId: String, size: Long): List<Job> {
+        return waitQueueRedisRepository.popMin(eventId, size)
+    }
+
+    fun getWaitQueueSizes(eventIds: List<String>): List<QueueSize> {
+        return waitQueueRedisRepository.sizes(eventIds)
+    }
+
+    fun findJobsBy(queueInfos: List<QueueInfo>): List<Job> {
+        return waitQueueRedisRepository.popMin(queueInfos)
     }
 }
