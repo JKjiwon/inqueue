@@ -47,8 +47,8 @@ class JobServiceTest {
     @DisplayName("JobQueue에 여유가 있고, WaitQueue가 비어있으면 JobQueue 에 들어간다.")
     fun job_enter_job_queue() {
         // given
-        every { waitQueueService.size(JobStatus.WAIT.makeRedisKey(eventId)) } returns 0
-        every { jobRedisRepository.size(JobStatus.ENTER.makeRedisKey(eventId)) } returns 5
+        every { waitQueueService.size(eventId) } returns 0
+        every { jobRedisRepository.size(eventId) } returns 5
 
         // when
         val jobResponse = jobService.enter(eventId, userId)
@@ -67,8 +67,8 @@ class JobServiceTest {
     @DisplayName("JobQueue에 여유가 있으나, WaitQueue가 비어있지 않으면 WaitQueue 에 들어간다.")
     fun job_enter_wait_queue() {
         // given
-        every { waitQueueService.size(JobStatus.WAIT.makeRedisKey(eventId)) } returns 5
-        every { jobRedisRepository.size(JobStatus.ENTER.makeRedisKey(eventId)) } returns 0
+        every { waitQueueService.size(eventId) } returns 5
+        every { jobRedisRepository.size(eventId) } returns 5
 
         // when
         jobService.enter(eventId, userId)

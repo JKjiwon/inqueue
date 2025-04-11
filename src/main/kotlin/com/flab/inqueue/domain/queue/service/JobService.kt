@@ -22,7 +22,7 @@ class JobService(
     fun enter(eventId: String, userId: String): JobResponse {
         val event = findEvent(eventId)
 
-        if (isEnterJob(event)) {
+        if (canEnterJob(event)) {
             val job = Job(eventId, userId, JobStatus.ENTER, event.jobQueueLimitTime)
             jobRedisRepository.save(job)
             return JobResponse(job.status)
@@ -106,18 +106,18 @@ class JobService(
     }
 
     fun getJobQueueSize(event: Event): Long {
-        return jobRedisRepository.size(JobStatus.ENTER.makeRedisKey(event.eventId))
+        return jobRedisRepository.size(event.eventId)
     }
 
     fun getWaitQueueSize(event: Event): Long {
-        return waitQueueService.size(JobStatus.WAIT.makeRedisKey(event.eventId))
+        return waitQueueService.size(event.eventId)
     }
 
     private fun findEvent(eventId: String): Event {
         return eventRepository.findByEventId(eventId) ?: throw ApplicationException.of(ErrorCode.EVENT_NOT_FOUND)
     }
 
-    private fun isEnterJob(event: Event): Boolean {
+    private fun canEnterJob(event: Event): Boolean {
         val waitQueueSize = getWaitQueueSize(event)
         val jobQueueSize = getJobQueueSize(event)
 

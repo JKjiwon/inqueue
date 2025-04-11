@@ -32,8 +32,8 @@ class WaitQueueService(
         return JobResponse(JobStatus.WAIT, WaitQueueInfo(rank * job.waitTimePerOneJob, rank.toInt()))
     }
 
-    fun size(key: String): Long {
-        return waitQueueRedisRepository.size(key)
+    fun size(eventId: String): Long {
+        return waitQueueRedisRepository.size(eventId)
     }
 
     fun remove(job: Job) {
