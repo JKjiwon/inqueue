@@ -12,6 +12,7 @@ class EnterJobScheduler(
     private val eventRepository: EventRepository,
     private val enterJobScheduleTask: EnterJobScheduleTask
 ) {
+    @Deprecated("현재 사용하지 스케쥴러 입니다. 변경된 로직과 테스트 후 삭제 예정입니다.")
     // @Scheduled(fixedRate = 1000)
     fun execute() {
         val events = eventRepository.findOngoingEvents(LocalDateTime.now())

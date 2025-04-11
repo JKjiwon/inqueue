@@ -37,6 +37,7 @@ class JobService(
         return waitQueueService.register(waitJob)
     }
 
+    @Deprecated("현재 사용하지 않는 함수 입니다. 변경된 로직과 테스트 후 삭제 예정입니다.")
     fun enqueue(event: Event, size: Long) {
         val waitJobs: List<Job> = waitQueueService.findJobsBy(event.eventId, size)
         val enterJobs = waitJobs.map { it.enter() }
