@@ -10,6 +10,7 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.RedisKeyValueAdapter
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
@@ -29,7 +30,7 @@ class RedisConfig(
         return LettuceConnectionFactory(redisStandaloneConfiguration)
     }
 
-    @Bean(name = ["jobRedisTemplate"])
+    @Bean
     fun jobRedisTemplate(connectionFactory: RedisConnectionFactory): RedisTemplate<String, Job> {
         val redisTemplate = RedisTemplate<String, Job>()
         val objectMapper = jacksonObjectMapper()
@@ -42,8 +43,8 @@ class RedisConfig(
     }
 
     @Bean
-    fun redisTemplate(): RedisTemplate<*, *> {
-        val redisTemplate: RedisTemplate<*, *> = RedisTemplate<Any, Any>()
+    fun userRedisTemplate(): RedisTemplate<String, String> {
+        val redisTemplate = StringRedisTemplate()
         redisTemplate.setEnableTransactionSupport(true)
         redisTemplate.setConnectionFactory(redisConnectionFactory())
         return redisTemplate

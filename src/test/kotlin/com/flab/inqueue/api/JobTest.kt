@@ -79,7 +79,7 @@ class JobTest : AcceptanceTest() {
 
         eventRepository.save(event)
         job = Job(event.eventId, userId, JobStatus.ENTER, event.jobQueueLimitTime, event.jobQueueSize)
-        jobRedisRepository.register(job)
+        jobRedisRepository.save(job)
     }
 
     @Test

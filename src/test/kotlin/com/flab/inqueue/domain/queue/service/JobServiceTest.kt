@@ -45,17 +45,17 @@ class JobServiceTest {
 
     @Test
     @DisplayName("JobQueue에 여유가 있고, WaitQueue가 비어있으면 JobQueue 에 들어간다.")
-    fun job_enter_job_queue() {
+    fun job_enqueue_job_queue() {
         // given
-        every { waitQueueService.size(JobStatus.WAIT.makeRedisKey(eventId)) } returns 0
-        every { jobRedisRepository.size(JobStatus.ENTER.makeRedisKey(eventId)) } returns 5
+        every { waitQueueService.size(eventId) } returns 0
+        every { jobRedisRepository.size(eventId) } returns 5
 
         // when
-        val jobResponse = jobService.enter(eventId, userId)
+        val jobResponse = jobService.enqueue(eventId, userId)
 
         // then
         val enterJob = Job(eventId, userId, JobStatus.ENTER, event.jobQueueLimitTime)
-        verify { jobRedisRepository.register(enterJob) }
+        verify { jobRedisRepository.save(enterJob) }
 
         val waitJob = Job(eventId, userId, JobStatus.WAIT, event.jobQueueLimitTime, event.jobQueueSize)
         verify(exactly = 0) { waitQueueService.register(waitJob) }
@@ -65,25 +65,25 @@ class JobServiceTest {
 
     @Test
     @DisplayName("JobQueue에 여유가 있으나, WaitQueue가 비어있지 않으면 WaitQueue 에 들어간다.")
-    fun job_enter_wait_queue() {
+    fun job_enqueue_wait_queue() {
         // given
-        every { waitQueueService.size(JobStatus.WAIT.makeRedisKey(eventId)) } returns 5
-        every { jobRedisRepository.size(JobStatus.ENTER.makeRedisKey(eventId)) } returns 0
+        every { waitQueueService.size(eventId) } returns 5
+        every { jobRedisRepository.size(eventId) } returns 5
 
         // when
-        jobService.enter(eventId, userId)
+        jobService.enqueue(eventId, userId)
 
         // then
         val waitJob = Job(eventId, userId, JobStatus.WAIT, event.jobQueueLimitTime, event.jobQueueSize)
         verify { waitQueueService.register(waitJob) }
 
         val enterJob = Job(eventId, userId, JobStatus.ENTER, event.jobQueueLimitTime)
-        verify(exactly = 0) { jobRedisRepository.register(enterJob) }
+        verify(exactly = 0) { jobRedisRepository.save(enterJob) }
     }
 
     @Test
     @DisplayName("enter_job 검색")
-    fun retrieve_enter_job() {
+    fun retrieve_enqueue_job() {
         // given
         val enterJob = Job(eventId, userId, JobStatus.ENTER)
         every { jobRedisRepository.isMember(enterJob) } returns true

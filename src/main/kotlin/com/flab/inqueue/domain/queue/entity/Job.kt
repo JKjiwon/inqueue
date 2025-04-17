@@ -14,7 +14,7 @@ class Job(
     val waitTimePerOneJob: Long
         get() = if (jobQueueSize == null) 0L else queueLimitTime / jobQueueSize
 
-    fun enter(queueLimitTime: Long): Job {
+    fun enter(): Job {
         if (status != JobStatus.WAIT) {
             return this
         }
@@ -43,5 +43,11 @@ class Job(
         result = 31 * result + status.hashCode()
         return result
     }
+
+    override fun toString(): String {
+        return "Job(jobQueueSize=$jobQueueSize, eventId='$eventId', userId='$userId', status=$status, queueLimitTime=$queueLimitTime, redisKey='$redisKey', redisValue='$redisValue', waitTimePerOneJob=$waitTimePerOneJob)"
+    }
+
+
 }
 

@@ -1,51 +1,37 @@
 package com.flab.inqueue.domain.queue.repository
 
+import com.flab.inqueue.domain.queue.dto.QueueInfo
+import com.flab.inqueue.domain.queue.dto.QueueSize
 import com.flab.inqueue.domain.queue.entity.Job
+import com.flab.inqueue.domain.queue.entity.JobStatus
 import com.flab.inqueue.domain.queue.exception.RedisDataAccessException
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.data.redis.connection.StringRedisConnection
-import org.springframework.data.redis.core.Cursor
 import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.data.redis.core.ScanOptions
 import org.springframework.data.redis.core.ZSetOperations
 import org.springframework.stereotype.Repository
 import java.util.concurrent.TimeUnit
 
 @Repository
 class WaitQueueRedisRepository(
-    @Qualifier("jobRedisTemplate")
-    private val waitQueueRedisTemplate: RedisTemplate<String, Job>,
+    private val jobRedisTemplate: RedisTemplate<String, Job>,
     private val userRedisTemplate: RedisTemplate<String, String>,
 ) {
-    fun register(job: Job): Long {
-        waitQueueRedisTemplate.opsForZSet().add(job.redisKey, job, System.nanoTime().toDouble())
+    fun save(job: Job): Long {
+        jobRedisTemplate.opsForZSet().add(job.redisKey, job, System.nanoTime().toDouble())
         userRedisTemplate.opsForValue().set(job.redisValue, job.redisValue, job.queueLimitTime, TimeUnit.SECONDS)
         return rank(job)
     }
 
-    fun size(key: String): Long {
-        return waitQueueRedisTemplate.opsForZSet().size(key) ?: throw RedisDataAccessException("데이터에 접근 할 수 없습니다.")
-    }
-
-    fun range(key: String, start: Long, end: Long): MutableSet<Job> {
-        return waitQueueRedisTemplate.opsForZSet().range(key, start, end)
-            ?: throw RedisDataAccessException("데이터에 접근 할 수 없습니다.")
-    }
-
     fun rank(job: Job): Long {
-        return waitQueueRedisTemplate.opsForZSet().rank(job.redisKey, job)
+        return jobRedisTemplate.opsForZSet().rank(job.redisKey, job)
             ?: throw RedisDataAccessException("데이터에 접근 할 수 없습니다.")
     }
 
     fun remove(job: Job) {
-        waitQueueRedisTemplate.opsForZSet().remove(job.redisKey, job)
+        jobRedisTemplate.opsForZSet().remove(job.redisKey, job)
             ?: throw RedisDataAccessException("데이터에 접근 할 수 없습니다.")
         userRedisTemplate.opsForValue().getAndDelete(job.redisValue)
             ?: throw RedisDataAccessException("데이터에 접근 할 수 없습니다.")
-    }
-
-    fun findMe(job: Job): Cursor<ZSetOperations.TypedTuple<Job>> {
-        return waitQueueRedisTemplate.opsForZSet().scan(job.redisKey, ScanOptions.NONE)
     }
 
     fun isMember(job: Job): Boolean {
@@ -57,17 +43,61 @@ class WaitQueueRedisRepository(
         userRedisTemplate.opsForValue().set(job.redisValue, job.redisValue, job.queueLimitTime, TimeUnit.SECONDS)
     }
 
-    fun popMin(key: String, size: Long): MutableSet<ZSetOperations.TypedTuple<Job>> {
-        val jobTuples = waitQueueRedisTemplate.opsForZSet().popMin(key, size)
+    fun popMin(eventId: String, size: Long): List<Job> {
+        val redisKey = JobStatus.WAIT.makeRedisKey(eventId)
+        val jobs = jobRedisTemplate.opsForZSet().popMin(redisKey, size)?.mapNotNull { it.value }
             ?: throw RedisDataAccessException("데이터에 접근 할 수 없습니다.")
 
         userRedisTemplate.executePipelined { connection ->
             val redisConnection = connection as StringRedisConnection
-            for (jobTuple in jobTuples) {
-                redisConnection.del(jobTuple.value!!.redisValue)
+            for (job in jobs) {
+                redisConnection.del(job.redisValue)
             }
             null
         }
-        return jobTuples
+        return jobs
     }
+
+    fun popMin(queueInfos: List<QueueInfo>): List<Job> {
+        val results = jobRedisTemplate.executePipelined { connection ->
+            queueInfos.forEach { queueInfo ->
+                val redisKey = JobStatus.WAIT.makeRedisKey(queueInfo.eventId)
+                connection.zSetCommands().zPopMin(redisKey.toByteArray(), queueInfo.size)
+            }
+            null
+        }
+
+        val jobs = results.filterIsInstance<Set<*>>()
+            .flatten()
+            .mapNotNull { it as? ZSetOperations.TypedTuple<*> }
+            .mapNotNull { it.value as? Job }
+
+        userRedisTemplate.executePipelined { connection ->
+            val redisConnection = connection as StringRedisConnection
+            for (job in jobs) {
+                redisConnection.del(job.redisValue)
+            }
+            null
+        }
+        return jobs
+    }
+
+    fun size(eventId: String): Long {
+        val redisKey = JobStatus.WAIT.makeRedisKey(eventId)
+        return jobRedisTemplate.opsForZSet().size(redisKey) ?: throw RedisDataAccessException("데이터에 접근 할 수 없습니다.")
+    }
+
+    fun sizes(eventId: List<String>): List<QueueSize> {
+        val redisKeys = eventId.map { JobStatus.WAIT.makeRedisKey(it) }
+        val sizes = jobRedisTemplate.executePipelined { connection ->
+            redisKeys.forEach { redisKey ->
+                connection.zSetCommands().zCard(redisKey.toByteArray())
+            }
+            null
+        }
+
+        return eventId.zip(sizes.map { it as Long })
+            .map { (key, size) -> QueueSize(key, size) }
+    }
+
 }

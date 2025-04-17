@@ -4,6 +4,8 @@ import com.flab.inqueue.domain.event.entity.Event
 import com.flab.inqueue.domain.event.repository.EventRepository
 import com.flab.inqueue.domain.queue.dto.JobResponse
 import com.flab.inqueue.domain.queue.dto.JobVerificationResponse
+import com.flab.inqueue.domain.queue.dto.QueueInfo
+import com.flab.inqueue.domain.queue.dto.QueueSize
 import com.flab.inqueue.domain.queue.entity.Job
 import com.flab.inqueue.domain.queue.entity.JobStatus
 import com.flab.inqueue.domain.queue.repository.JobRedisRepository
@@ -17,12 +19,12 @@ class JobService(
     private val eventRepository: EventRepository,
     private val waitQueueService: WaitQueueService,
 ) {
-    fun enter(eventId: String, userId: String): JobResponse {
+    fun enqueue(eventId: String, userId: String): JobResponse {
         val event = findEvent(eventId)
 
-        if (isEnterJob(event)) {
+        if (canEnterJob(event)) {
             val job = Job(eventId, userId, JobStatus.ENTER, event.jobQueueLimitTime)
-            jobRedisRepository.register(job)
+            jobRedisRepository.save(job)
             return JobResponse(job.status)
         }
 
@@ -35,10 +37,33 @@ class JobService(
         return waitQueueService.register(waitJob)
     }
 
-    fun enterAll(event: Event, size: Long) {
-        val waitJobs: List<Job> = waitQueueService.getJobsBySize(event.eventId, size)
-        val enterJobs = waitJobs.map { it.enter(event.jobQueueLimitTime) }
-        jobRedisRepository.registerAll(enterJobs)
+    @Deprecated("현재 사용하지 않는 함수 입니다. 변경된 로직과 테스트 후 삭제 예정입니다.")
+    fun enqueue(event: Event, size: Long) {
+        val waitJobs: List<Job> = waitQueueService.findJobsBy(event.eventId, size)
+        val enterJobs = waitJobs.map { it.enter() }
+        jobRedisRepository.saveAll(enterJobs)
+    }
+
+    fun enqueue(events: List<Event>) {
+        val jobTargetEventIds = waitQueueService.getWaitQueueSizes(events.map { it.eventId })
+            .filter { it.size != 0L }
+            .map { it.eventId }.toList()
+
+        val jobQueueSizesMap = getJobQueueSizes(jobTargetEventIds)
+            .associate { event -> event.eventId to event.size }
+
+        val queueReadyEvents = events.filter { jobQueueSizesMap.containsKey(it.eventId) }
+        val queueInfos: MutableList<QueueInfo> = mutableListOf()
+        for (event in queueReadyEvents) {
+            val availableJobQueueSize = event.jobQueueSize - jobQueueSizesMap[event.eventId]!!
+            if (availableJobQueueSize > 0) {
+                queueInfos.add(QueueInfo(event.eventId, availableJobQueueSize))
+            }
+        }
+
+        val waitJobs = waitQueueService.findJobsBy(queueInfos)
+        val enterJobs = waitJobs.map { it.enter() }
+        jobRedisRepository.saveAll(enterJobs)
     }
 
     fun retrieve(eventId: String, userId: String): JobResponse {
@@ -56,6 +81,7 @@ class JobService(
         )
         return waitQueueService.retrieve(waitJob)
     }
+
 
     fun verify(eventId: String, clientId: String, userId: String): JobVerificationResponse {
         val event = findEvent(eventId)
@@ -82,21 +108,25 @@ class JobService(
     }
 
     fun getJobQueueSize(event: Event): Long {
-        return jobRedisRepository.size(JobStatus.ENTER.makeRedisKey(event.eventId))
+        return jobRedisRepository.size(event.eventId)
     }
 
     fun getWaitQueueSize(event: Event): Long {
-        return waitQueueService.size(JobStatus.WAIT.makeRedisKey(event.eventId))
+        return waitQueueService.size(event.eventId)
     }
 
     private fun findEvent(eventId: String): Event {
         return eventRepository.findByEventId(eventId) ?: throw ApplicationException.of(ErrorCode.EVENT_NOT_FOUND)
     }
 
-    private fun isEnterJob(event: Event): Boolean {
+    private fun canEnterJob(event: Event): Boolean {
         val waitQueueSize = getWaitQueueSize(event)
         val jobQueueSize = getJobQueueSize(event)
 
         return waitQueueSize == 0L && jobQueueSize < event.jobQueueSize
+    }
+
+    private fun getJobQueueSizes(eventIds: List<String>): List<QueueSize> {
+        return jobRedisRepository.sizes(eventIds)
     }
 }

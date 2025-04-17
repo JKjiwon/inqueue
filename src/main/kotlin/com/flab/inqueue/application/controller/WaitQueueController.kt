@@ -17,7 +17,7 @@ class WaitQueueController(
         @PathVariable("eventId") eventId: String,
         @AuthenticationPrincipal principal: CommonPrincipal,
     ): JobResponse {
-        return jobService.enter(eventId, principal.userId!!)
+        return jobService.enqueue(eventId, principal.userId!!)
     }
 
     @GetMapping("/{eventId}")
