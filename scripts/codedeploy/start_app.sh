@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd /home/ec2-user/inqueue || exit 1
+
 # MySQL 컨테이너가 없으면 시작
 if [ -z "$(docker ps -q --filter name=docker-mysql)" ]; then
   echo "Starting MySQL container."
