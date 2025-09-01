@@ -45,9 +45,7 @@ class WaitQueueService(
     }
 
     fun getWaitQueueSizes(eventIds: List<String>): List<QueueSize> {
-        val sizes = waitQueueRedisRepository.sizes(eventIds)
-        println(sizes)
-        return sizes
+        return waitQueueRedisRepository.sizes(eventIds)
     }
 
     fun findJobsBy(queueInfos: List<QueueInfo>): List<Job> {
