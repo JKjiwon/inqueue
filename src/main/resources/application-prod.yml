@@ -15,11 +15,10 @@ spring:
       ddl-auto: none
     open-in-view: false
 
-
 member:
   key:
-    client-id-size: ${CUSTOMER_ACCOUNT_CLIENT_ID_size}
-    client-secret-size: ${CUSTOMER_ACCOUNT_CLIENT_SECRET_size}
+    client-id-size: ${MEMBER_ACCOUNT_CLIENT_ID_SIZE}
+    client-secret-size: ${MEMBER_ACCOUNT_CLIENT_SECRET_SIZE}
 
 jwt:
   secret-key: ${JWT_TOKEN_SECRET_KEY}
