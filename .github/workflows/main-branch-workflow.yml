@@ -66,7 +66,7 @@ jobs:
 
       - name: Create deployment bundle
         run: |
-          zip -r $GITHUB_SHA.zip appspec.yml docker-compose.yml scripts/
+          zip -r $GITHUB_SHA.zip appspec.yml docker-compose.yml .env scripts/
         shell: bash
 
       - name: Configure AWS credentials
