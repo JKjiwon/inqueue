@@ -4,8 +4,8 @@ CREATE TABLE member
     id                 BIGINT AUTO_INCREMENT PRIMARY KEY,
     created_date_time  DATETIME(6),
     modified_date_time DATETIME(6),
-    client_id          VARCHAR(50),
-    client_secret      VARCHAR(100),
+    client_id          VARCHAR(255),
+    client_secret      VARCHAR(255),
     name               VARCHAR(30),
     phone              VARCHAR(20)
 );
