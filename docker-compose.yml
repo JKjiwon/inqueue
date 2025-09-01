@@ -1,5 +1,6 @@
 services:
   inqueue-service:
+    container_name: inqueue-service
     restart: always
     image: ${DOCKERHUB_USERNAME}/inqueue:latest
     environment:
