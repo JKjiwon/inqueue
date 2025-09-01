@@ -33,7 +33,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
       - inqueue_db_data:/var/lib/mysql
-      - ./mysql-scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./scripts/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - inqueue
     healthcheck:
