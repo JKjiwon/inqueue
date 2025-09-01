@@ -1,5 +1,6 @@
 services:
   inqueue-service:
+    container_name: inqueue-service
     restart: always
     image: ${DOCKERHUB_USERNAME}/inqueue:latest
     environment:
@@ -16,8 +17,10 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - docker-mysql
-      - docker-redis
+      docker-mysql:
+        condition: service_healthy
+      docker-redis:
+        condition: service_healthy
     networks:
       - inqueue
 
@@ -29,8 +32,17 @@ services:
     environment:
       MYSQL_DATABASE: inqueue
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - inqueue_db_data:/var/lib/mysql
+      - ./scripts/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - inqueue
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   docker-redis:
     container_name: docker-redis
@@ -39,6 +51,14 @@ services:
       - "6379:6379"
     networks:
       - inqueue
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  inqueue_db_data:
 
 networks:
   inqueue:

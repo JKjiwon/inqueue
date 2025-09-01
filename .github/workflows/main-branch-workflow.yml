@@ -63,6 +63,18 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP_NAME }}:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.APP_NAME }}:${{ github.sha }}
 
+      - name: Create .env file
+        run: |
+          echo "SPRING_PROFILES_ACTIVE=prod" >> .env
+          echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> .env
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> .env
+          echo "MEMBER_ACCOUNT_CLIENT_ID_SIZE=${{ secrets.MEMBER_ACCOUNT_CLIENT_ID_SIZE }}" >> .env
+          echo "MEMBER_ACCOUNT_CLIENT_SECRET_SIZE=${{ secrets.MEMBER_ACCOUNT_CLIENT_SECRET_SIZE }}" >> .env
+          echo "JWT_TOKEN_SECRET_KEY=${{ secrets.JWT_TOKEN_SECRET_KEY }}" >> .env
+          echo "JWT_TOKEN_EXPIRATION_MILLS=${{ secrets.JWT_TOKEN_EXPIRATION_MILLS }}" >> .env
+          echo "AES256_SECRET_KEY=${{ secrets.AES256_SECRET_KEY }}" >> .env
+          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
 
       - name: Create deployment bundle
         run: |
@@ -78,3 +90,6 @@ jobs:
 
       - name: Upload to S3
         run: aws s3 cp --region ${{ env.AWS_REGION }} ./$GITHUB_SHA.zip s3://${{ env.S3_BUCKET_NAME }}/$GITHUB_SHA.zip
+
+      - name: Code Deploy
+        run: aws deploy create-deployment --application-name $CODEDEPLOY_NAME --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name $CODEDEPLOY_GROUP --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=$GITHUB_SHA.zip
